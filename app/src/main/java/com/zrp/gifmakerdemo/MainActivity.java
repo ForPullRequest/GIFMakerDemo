@@ -66,8 +66,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.generate://生成gif图
                 Toast.makeText(MainActivity.this, "开始生成Gif图", Toast.LENGTH_SHORT).show();
 
-                String file_name = file_text.getText().toString();
-                createGif(TextUtils.isEmpty(file_name) ? "demo1" : file_name, delay_bar.getProgress());
+                final String file_name = file_text.getText().toString();
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        createGif(TextUtils.isEmpty(file_name) ? "demo1" : file_name, delay_bar.getProgress());
+                    }
+                }).start();
                 break;
             case R.id.clear:
                 clearData();
@@ -91,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void createGif(String file_name, int delay) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        AnimatedGifEncoder localAnimatedGifEncoder = new AnimatedGifEncoder();
+        final AnimatedGifEncoder localAnimatedGifEncoder = new AnimatedGifEncoder();
         localAnimatedGifEncoder.start(baos);//start
         localAnimatedGifEncoder.setRepeat(0);//设置生成gif的开始播放时间。0为立即开始播放
         localAnimatedGifEncoder.setDelay(delay);
@@ -102,14 +108,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             for (int i = 0; i < pics.size(); i++) {
                 // Bitmap localBitmap = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(pics.get(i)), 512, 512);
-                localAnimatedGifEncoder.addFrame(BitmapFactory.decodeFile(pics.get(i)));
+                BitmapFactory.Options option = new BitmapFactory.Options();
+                File f = new File(pics.get(i));
+                double size = f.length() / 1024.0;
+                double result = size / 100.0;
+                int multi;
+                if (f.getName().contains(".gif"))
+                    if (result < 3)
+                        multi = 1;
+                    else
+                        multi = 2;
+                else {
+                    if (result < 1)//小于100kb
+                        multi = 1;
+                    else if (result < 5)//100-500kb
+                        multi = 2;
+                    else if (result < 15)//500kb-1.5mb
+                        multi = 4;
+                    else if (result < 60)//1.5-6mb
+                        multi = 8;
+                    else//6mb以上
+                        multi = 16;
+                }
+                Log.d("Main", "multi " + multi + "/" + size + "kb");
+                option.inSampleSize = multi;
+                localAnimatedGifEncoder.addFrame(BitmapFactory.decodeFile(pics.get(i), option));
             }
         }
         localAnimatedGifEncoder.finish();//finish
 
         File file = new File(Environment.getExternalStorageDirectory().getPath() + "/GIFMakerDemo");
         if (!file.exists()) file.mkdir();
-        String path = Environment.getExternalStorageDirectory().getPath() + "/GIFMakerDemo/" + file_name + ".gif";
+        final String path = Environment.getExternalStorageDirectory().getPath() + "/GIFMakerDemo/" + file_name + ".gif";
         Log.d(TAG, "createGif: ---->" + path);
 
         try {
@@ -122,9 +152,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        gif_image.setImageURI(Uri.parse(path));
-        Toast.makeText(MainActivity.this, "Gif已生成。保存路径：\n" + path, Toast.LENGTH_LONG).show();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                gif_image.setImageURI(Uri.parse(path));
+                Toast.makeText(MainActivity.this, "Gif已生成。保存路径：\n" + path, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     /**

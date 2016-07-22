@@ -1,7 +1,11 @@
 package com.zrp.gifmakerdemo;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +13,9 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.List;
 
 /**
@@ -73,10 +80,38 @@ public class PhotoAdapter extends BaseAdapter {
         } else {
             //加载本地uri资源
             Log.d("photoAdapter", "getView: ---->" + getItem(position));
-            holder.image_view.setImageURI(Uri.parse(getItem(position)));
+            Bitmap b =  zoomImage(getItem(position));
+            holder.image_view.setImageBitmap(b);
         }
 
         return convertView;
+    }
+
+    public static Bitmap zoomImage(String picturePath) {
+        File f = new File(picturePath);
+        double size = f.length() / 1024.0;
+        BitmapFactory.Options option = new BitmapFactory.Options();
+        double result = size / 100.0;
+        int multi;
+        if (f.getName().contains(".gif"))
+            if (result < 3)
+                multi = 1;
+            else
+                multi = 2;
+        else {
+            if (result < 1)//小于100kb
+                multi = 1;
+            else if (result < 5)//100-500kb
+                multi = 2;
+            else if (result < 15)//500kb-1.5mb
+                multi = 4;
+            else if (result < 60)//1.5-6mb
+                multi = 8;
+            else//6mb以上
+                multi = 16;
+        }
+        option.inSampleSize = multi;
+        return BitmapFactory.decodeFile(picturePath, option);
     }
 
     static class ViewHolder {
