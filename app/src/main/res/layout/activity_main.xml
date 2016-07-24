@@ -10,8 +10,8 @@
         android:horizontalSpacing="5dp"
         android:numColumns="4"
         android:verticalSpacing="5dp" />
-
-    <pl.droidsonroids.gif.GifImageView
+    <!--pl.droidsonroids.gif.GifImageView-->
+    <com.zrp.gifmakerdemo.GifView
         android:id="@+id/gif_image"
         android:layout_width="150dp"
         android:layout_height="150dp"

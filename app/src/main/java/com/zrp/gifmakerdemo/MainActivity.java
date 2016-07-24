@@ -1,8 +1,11 @@
 package com.zrp.gifmakerdemo;
 
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Movie;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -20,19 +23,24 @@ import com.zrp.gifmakerdemo.gifmaker.AnimatedGifEncoder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import pl.droidsonroids.gif.GifImageView;
-
+/**
+ * http://blog.csdn.net/loongggdroid/article/details/21166563
+ */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private GridView grid_view;
-    private GifImageView gif_image;
+    private GifView gif_image;
     private EditText file_text;
     private SeekBar delay_bar;
+    String defaultPath = Environment.getExternalStorageDirectory().getPath() + "/GIFMakerDemo/demo1.gif";
 
     public static final String TAG = "MainActivity";
     public static final int START_ALBUM_CODE = 0x21;
@@ -52,12 +60,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         grid_view = (GridView) findViewById(R.id.grid_view);
         file_text = (EditText) findViewById(R.id.file_text);
         delay_bar = (SeekBar) findViewById(R.id.delay_bar);
-        gif_image = (GifImageView) findViewById(R.id.gif_image);
+        gif_image = (GifView) findViewById(R.id.gif_image);
         findViewById(R.id.generate).setOnClickListener(this);
         findViewById(R.id.clear).setOnClickListener(this);
-
+//        gif_image.setImageBitmap(setGif(defaultPath));
+        setMovie(defaultPath);
+        gif_image.setMovie(mMovie);
+//        gif_image.setImageBitmap(getLocalBitmap(defaultPath));
+//        gif_image.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         adapter = new PhotoAdapter(this, null);
         grid_view.setAdapter(adapter);
+    }
+
+    public Bitmap setGif(String path){
+        Uri gif_uri=Uri.parse(path); //图片地址
+        ContentResolver cr=this.getContentResolver();
+        Bitmap bmp = null;
+        try {
+            bmp = BitmapFactory.decodeStream(cr.openInputStream(gif_uri));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return bmp;
     }
 
     @Override
@@ -87,7 +111,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void clearData() {
         pics.clear();
         adapter.setList(null);
-        gif_image.setImageDrawable(null);
+        gif_image.setMovie(null);
+//        gif_image.setImageDrawable(null);
     }
 
     /**
@@ -155,10 +180,58 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                gif_image.setImageURI(Uri.parse(path));
+                setMovie(defaultPath);
+                gif_image.setMovie(mMovie);
+//                gif_image.setImageBitmap(getLocalBitmap(path));
+//                gif_image.setImageURI(Uri.parse(path));//.setImageURI(Uri.parse(path));
                 Toast.makeText(MainActivity.this, "Gif已生成。保存路径：\n" + path, Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    public static Bitmap getLocalBitmap(String url) {
+        try {
+            FileInputStream fis = new FileInputStream(url);
+            return BitmapFactory.decodeStream(fis);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    private static Movie mMovie;
+    public static Bitmap getLocalBitmap1(String url) {
+        try {
+            FileInputStream fis = new FileInputStream(url);
+            byte[] bytes = streamToBytes(fis);
+            mMovie = Movie.decodeByteArray(bytes, 0, bytes.length);
+            return BitmapFactory.decodeStream(fis);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static void setMovie(String url){
+        try {
+            FileInputStream fis = new FileInputStream(url);
+            byte[] bytes = streamToBytes(fis);
+            mMovie = Movie.decodeByteArray(bytes, 0, bytes.length);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static byte[] streamToBytes(InputStream is) {
+        ByteArrayOutputStream os = new ByteArrayOutputStream(1024);
+        byte[] buffer = new byte[1024];
+        int len;
+        try {
+            while ((len = is.read(buffer)) >= 0) {
+                os.write(buffer, 0, len);
+            }
+        } catch (java.io.IOException e) {
+        }
+        return os.toByteArray();
     }
 
     /**
