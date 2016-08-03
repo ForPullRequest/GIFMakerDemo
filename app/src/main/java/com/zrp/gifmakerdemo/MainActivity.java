@@ -1,9 +1,7 @@
 package com.zrp.gifmakerdemo;
 
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Movie;
 import android.net.Uri;
@@ -72,17 +70,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         grid_view.setAdapter(adapter);
     }
 
-    public Bitmap setGif(String path){
-        Uri gif_uri=Uri.parse(path); //图片地址
-        ContentResolver cr=this.getContentResolver();
-        Bitmap bmp = null;
-        try {
-            bmp = BitmapFactory.decodeStream(cr.openInputStream(gif_uri));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        return bmp;
-    }
+//    public Bitmap setGif(String path){
+//        Uri gif_uri=Uri.parse(path); //图片地址
+//        ContentResolver cr=this.getContentResolver();
+//        Bitmap bmp = null;
+//        try {
+//            bmp = BitmapFactory.decodeStream(cr.openInputStream(gif_uri));
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        return bmp;
+//    }
 
     @Override
     public void onClick(View v) {
@@ -189,27 +187,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    public static Bitmap getLocalBitmap(String url) {
-        try {
-            FileInputStream fis = new FileInputStream(url);
-            return BitmapFactory.decodeStream(fis);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+//    public static Bitmap getLocalBitmap(String url) {
+//        try {
+//            FileInputStream fis = new FileInputStream(url);
+//            return BitmapFactory.decodeStream(fis);
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
     private static Movie mMovie;
-    public static Bitmap getLocalBitmap1(String url) {
-        try {
-            FileInputStream fis = new FileInputStream(url);
-            byte[] bytes = streamToBytes(fis);
-            mMovie = Movie.decodeByteArray(bytes, 0, bytes.length);
-            return BitmapFactory.decodeStream(fis);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+//    public static Bitmap getLocalBitmap1(String url) {
+//        try {
+//            FileInputStream fis = new FileInputStream(url);
+//            byte[] bytes = streamToBytes(fis);
+//            mMovie = Movie.decodeByteArray(bytes, 0, bytes.length);
+//            return BitmapFactory.decodeStream(fis);
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
 
     public static void setMovie(String url){
         try {

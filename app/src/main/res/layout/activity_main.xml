@@ -11,13 +11,19 @@
         android:numColumns="4"
         android:verticalSpacing="5dp" />
     <!--pl.droidsonroids.gif.GifImageView-->
-    <com.zrp.gifmakerdemo.GifView
-        android:id="@+id/gif_image"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:layout_below="@+id/grid_view"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="30dp" />
+    <com.zrp.gifmakerdemo.AspectRatioLinearLayout
+        android:layout_width="match_parent"
+        android:layout_below="@id/grid_view"
+        android:layout_marginTop="30dp"
+        android:layout_height="wrap_content">
+
+        <com.zrp.gifmakerdemo.GifView
+            android:id="@+id/gif_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true" />
+
+    </com.zrp.gifmakerdemo.AspectRatioLinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
